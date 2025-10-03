@@ -1,12 +1,12 @@
 "use server";
 
-import { satellite } from "@/config/api.config";
+import { satellite } from "../../config/api.config";
 import { APIBaseResponse } from "@/interfaces/api.interface";
 import {
   ICounter,
   ICreateCounterRequest,
   IUpdateCounterRequest,
-} from "@/interfaces/services/counter.interface";
+} from "../../interfaces/services/counter.interface";
 import { errorMessage } from "@/utils/error.util";
 const API_BASE_PATH = "/api/v1/counters";
 

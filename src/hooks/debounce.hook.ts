@@ -14,20 +14,25 @@ export const useDebounce = <T>(value: T, delay: number) => {
   return debouncedValue
 }
 
-export const useDebounceCallback = (callback: () => void, delay: number, deps: any[]) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+export const useDebounceCallback = <D extends readonly unknown[]>(
+  callback: () => void,
+  delay: number,
+  deps: D
+) => {
+  const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current)
     }
 
-    timeoutRef.current = setTimeout(callback, delay)
+    timeoutRef.current = window.setTimeout(callback, delay)
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current)
       }
     }
-  }, [...deps])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...(deps as readonly unknown[])])
 }

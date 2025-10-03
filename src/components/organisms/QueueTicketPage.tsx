@@ -5,7 +5,7 @@ import Card from "../atoms/Card";
 import {
   useClaimQueue,
   useReleaseQueue,
-} from "@/services/queue/wrapper.service";
+} from "../../services/queue/wrapper.service";
 import { useCounterAppStore } from "@/stores/global-states/counter/counter-app.store";
 import toast from "react-hot-toast";
 
@@ -18,7 +18,11 @@ const QueueTicketPage: FC<QueueTicketProps> = ({ className }) => {
   const { claimedQueue, setClaimedQueue } = useCounterAppStore();
   const { mutate: claimQueue } = useClaimQueue();
   const { mutate: releaseQueue } = useReleaseQueue();
-  const [debugQueue, setDebugQueue] = useState<any>(null);
+  const [debugQueue, setDebugQueue] = useState<
+    | null
+    | import("@/interfaces/services/queue.interface").ICurrentQueuesResponse[]
+    | import("@/interfaces/services/queue.interface").IClaimQueueResponse
+  >(null);
 
   const handleRefreshQueue = async () => {
     try {
@@ -35,16 +39,17 @@ const QueueTicketPage: FC<QueueTicketProps> = ({ className }) => {
 
   const handleClaim = () => {
     claimQueue(undefined, {
-      onSuccess: (res) => {
-        if (res.status === false || !res.data) {
+      onSuccess: (res: import("@/interfaces/api.interface").APIBaseResponse<import("@/interfaces/services/queue.interface").IClaimQueueResponse> | undefined) => {
+        if (!res || res.status === false || !res.data) {
           return setIsClaimSuccess(false);
         }
+        const data = res.data as import("@/interfaces/services/queue.interface").IClaimQueueResponse;
         setClaimedQueue({
-          counterId: res.data.counterId,
-          counterName: res.data.counterName,
-          estimatedWaitTime: res.data.estimatedWaitTime,
-          position: res.data.positionInQueue,
-          queueNumber: res.data.queueNumber,
+          counterId: data.counterId,
+          counterName: data.counterName,
+          estimatedWaitTime: data.estimatedWaitTime,
+          position: data.positionInQueue,
+          queueNumber: data.queueNumber,
         });
         setIsClaimSuccess(true);
       },
@@ -61,8 +66,8 @@ const QueueTicketPage: FC<QueueTicketProps> = ({ className }) => {
         queue_number: claimedQueue.queueNumber,
       },
       {
-        onSuccess: (res) => {
-          if (res.status === false) return;
+        onSuccess: (res: import("@/interfaces/api.interface").APIBaseResponse<{ success: boolean }> | undefined) => {
+          if (!res || res.status === false) return;
           setIsClaimSuccess(false);
           setClaimedQueue(null);
         },

@@ -80,7 +80,7 @@ const CurrentQueueDisplay: React.FC<CurrentQueueDisplayProps> = ({
         )}
 
         <Badge
-          variant={statusInfo.badgeVariant as any}
+          variant={statusInfo.badgeVariant as 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'}
           size="lg"
           className="mt-2"
         >

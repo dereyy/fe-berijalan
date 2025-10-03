@@ -17,6 +17,16 @@ import {
   apiSearchQueue,
   apiSkipQueue,
 } from "./api.service";
+import { APIBaseResponse } from "@/interfaces/api.interface";
+type APIError = { message?: string };
+import {
+  IClaimQueueResponse,
+  ICurrentQueuesResponse,
+  IGetQueueMetricsResponse,
+  INextQueueResponse,
+  IResetQueuesResponse,
+  ISkipQueueResponse,
+} from "@/interfaces/services/queue.interface";
 
 const QUEUE_KEYS = {
   all: ["queues"] as const,
@@ -26,14 +36,14 @@ const QUEUE_KEYS = {
 };
 
 export const useGetMetrics = () => {
-  return useQuery({
+  return useQuery<APIBaseResponse<IGetQueueMetricsResponse> | undefined>({
     queryKey: QUEUE_KEYS.metrics,
     queryFn: () => apiGetMetrics(),
   });
 };
 
 export const useGetCurrentQueues = () => {
-  return useQuery({
+  return useQuery<APIBaseResponse<ICurrentQueuesResponse[]> | undefined>({
     queryKey: QUEUE_KEYS.current,
     queryFn: () => apiGetCurrentQueues(),
     refetchInterval: 30000,
@@ -42,7 +52,7 @@ export const useGetCurrentQueues = () => {
 };
 
 export const useSearchQueue = (query: string) => {
-  return useQuery({
+  return useQuery<APIBaseResponse<import("@/interfaces/services/queue.interface").IQueue[] | undefined>>({
     queryKey: QUEUE_KEYS.search(query),
     queryFn: () => apiSearchQueue(query),
     refetchInterval: 30000,
@@ -51,14 +61,15 @@ export const useSearchQueue = (query: string) => {
 };
 
 export const useClaimQueue = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<IClaimQueueResponse>, unknown, void>({
     mutationFn: () => apiClaimQueue(),
     onSuccess: (response) => {
       const toastId = toast.loading("Memproses permintaan...", {
         duration: 5000,
       });
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to claim queue", {
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to claim queue", {
           id: toastId,
         });
         return;
@@ -73,20 +84,21 @@ export const useClaimQueue = () => {
       }
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to claim queue");
+      toast.error((error as APIError)?.message || "Failed to claim queue");
     },
   });
 };
 
 export const useReleaseQueue = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<{ success: boolean }>, unknown, IReleaseQueueRequest>({
     mutationFn: (data: IReleaseQueueRequest) => apiReleaseQueue(data),
     onSuccess: (response) => {
       const toastId = toast.loading("Memproses permintaan...", {
         duration: 5000,
       });
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to release queue", {
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to release queue", {
           id: toastId,
         });
         return;
@@ -101,20 +113,21 @@ export const useReleaseQueue = () => {
       }
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to release queue");
+      toast.error((error as APIError)?.message || "Failed to release queue");
     },
   });
 };
 
 export const useNextQueue = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<INextQueueResponse>, unknown, INextQueueRequest>({
     mutationFn: (data: INextQueueRequest) => apiNextQueue(data),
     onSuccess: (response) => {
       const toastId = toast.loading("Memproses permintaan...", {
         duration: 5000,
       });
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to process next queue", {
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to process next queue", {
           id: toastId,
         });
         return;
@@ -129,20 +142,21 @@ export const useNextQueue = () => {
       }
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to process next queue");
+      toast.error((error as APIError)?.message || "Failed to process next queue");
     },
   });
 };
 
 export const useSkipQueue = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<ISkipQueueResponse>, unknown, ISkipQueueRequest>({
     mutationFn: (data: ISkipQueueRequest) => apiSkipQueue(data),
     onSuccess: (response) => {
       const toastId = toast.loading("Memproses permintaan...", {
         duration: 5000,
       });
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to skip queue", {
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to skip queue", {
           id: toastId,
         });
         return;
@@ -157,20 +171,21 @@ export const useSkipQueue = () => {
       }
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to skip queue");
+      toast.error((error as APIError)?.message || "Failed to skip queue");
     },
   });
 };
 
 export const useResetQueues = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<IResetQueuesResponse>, unknown, IResetQueuesRequest>({
     mutationFn: (data: IResetQueuesRequest) => apiResetQueues(data),
     onSuccess: (response) => {
       const toastId = toast.loading("Memproses permintaan...", {
         duration: 5000,
       });
       if (response?.error) {
-        toast.error(response.error.message || "Failed to reset queues", {
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to reset queues", {
           id: toastId,
         });
         return;
@@ -185,7 +200,7 @@ export const useResetQueues = () => {
       }
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to reset queues");
+      toast.error((error as APIError)?.message || "Failed to reset queues");
     },
   });
 };

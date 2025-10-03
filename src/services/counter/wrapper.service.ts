@@ -13,6 +13,8 @@ import {
   IUpdateCounterRequest,
 } from "@/interfaces/services/counter.interface";
 import toast from "react-hot-toast";
+import { APIBaseResponse } from "@/interfaces/api.interface";
+type APIError = { message?: string };
 
 const COUNTER_KEYS = {
   all: ["counters"] as const,
@@ -41,9 +43,10 @@ export const useCreateCounter = () => {
 
   return useMutation({
     mutationFn: (data: ICreateCounterRequest) => apiCreateCounter(data),
-    onSuccess: (response) => {
+    onSuccess: (response: APIBaseResponse | undefined) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Gagal membuat counter");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Gagal membuat counter");
         return;
       }
 
@@ -54,8 +57,8 @@ export const useCreateCounter = () => {
         toast.error(response?.message || "Gagal membuat counter");
       }
     },
-    onError: (error) => {
-      toast.error(error?.message || "Gagal membuat counter");
+    onError: (error: unknown) => {
+      toast.error((error as APIError)?.message || "Gagal membuat counter");
     },
   });
 };
@@ -65,24 +68,25 @@ export const useUpdateCounter = () => {
 
   return useMutation({
     mutationFn: (data: IUpdateCounterRequest) => apiUpdateCounter(data),
-    onSuccess: (response, variables) => {
+    onSuccess: (response: APIBaseResponse | undefined, variables: IUpdateCounterRequest) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Gagal memperbarui counter");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Gagal memperbarui counter");
         return;
       }
 
       if (response && response.status === true) {
         toast.success("Counter berhasil diperbarui");
         queryClient.invalidateQueries({ queryKey: COUNTER_KEYS.all });
-        if (typeof variables.id === "number") {
+        if (variables && typeof variables.id === "number") {
           queryClient.invalidateQueries({ queryKey: COUNTER_KEYS.byId(variables.id) });
         }
       } else {
         toast.error(response?.message || "Gagal memperbarui counter");
       }
     },
-    onError: (error) => {
-      toast.error(error?.message || "Gagal memperbarui counter");
+    onError: (error: unknown) => {
+      toast.error((error as APIError)?.message || "Gagal memperbarui counter");
     },
   });
 };
@@ -92,9 +96,10 @@ export const useDeleteCounter = () => {
 
   return useMutation({
     mutationFn: (id: number) => apiDeleteCounter(id),
-    onSuccess: (response) => {
+    onSuccess: (response: APIBaseResponse | undefined) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Gagal menghapus counter");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Gagal menghapus counter");
         return;
       }
 
@@ -105,8 +110,8 @@ export const useDeleteCounter = () => {
         toast.error(response?.message || "Gagal menghapus counter");
       }
     },
-    onError: (error) => {
-      toast.error(error?.message || "Gagal menghapus counter");
+    onError: (error: unknown) => {
+      toast.error((error as APIError)?.message || "Gagal menghapus counter");
     },
   });
 };

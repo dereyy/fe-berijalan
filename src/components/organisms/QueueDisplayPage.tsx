@@ -3,7 +3,7 @@ import React from "react";
 import Card from "../atoms/Card";
 import { ICurrentQueuesResponse } from "@/interfaces/services/queue.interface";
 import CurrentQueueDisplay from "../molecules/CurrentQueueDisplay";
-import { useGetCurrentQueues } from "@/services/queue/wrapper.service";
+import { useGetCurrentQueues } from "../../services/queue/wrapper.service";
 
 interface QueueDisplayBoardProps {
   className?: string;

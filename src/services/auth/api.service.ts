@@ -1,5 +1,5 @@
 "use server";
-import { satellite } from "@/config/api.config";
+import { satellite } from "../../config/api.config";
 import { APIBaseResponse } from "@/interfaces/api.interface";
 import {
   IAdmin,
@@ -9,11 +9,12 @@ import {
   IToggleAdminStatusRequest,
   IToggleAdminStatusResponse,
   IUpdateAdminRequest,
-} from "@/interfaces/services/auth.interface";
+} from "../../interfaces/services/auth.interface";
 import { setToken } from "@/utils/cookie.util";
 import { errorMessage } from "@/utils/error.util";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
+import { AxiosError } from "axios";
 
 const API_BASE_PATH = "/api/v1/auth";
 
@@ -111,10 +112,12 @@ export const apiToggleAdminStatus = async (
   }
 };
 
-export const tokenInterceptor = async (error: any): Promise<any> => {
+export const tokenInterceptor = async (
+  error: unknown
+): Promise<APIBaseResponse<unknown>> => {
   const cookie = await cookies();
 
-  if (error?.response?.status === 401) {
+  if ((error as AxiosError)?.response?.status === 401) {
     cookie.delete("token");
     redirect("/login", RedirectType.replace);
   }

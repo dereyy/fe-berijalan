@@ -14,20 +14,25 @@ import {
   ILoginRequest,
   IToggleAdminStatusRequest,
   IUpdateAdminRequest,
-} from "@/interfaces/services/auth.interface";
+} from "../../interfaces/services/auth.interface";
 import toast from "react-hot-toast";
+import { APIBaseResponse } from "@/interfaces/api.interface";
+import { IAdmin, ILoginResponse, IToggleAdminStatusResponse } from "../../interfaces/services/auth.interface";
+
+type APIError = { message?: string };
 
 const AUTH_KEYS = {
   all: ["admins"] as const,
   byId: (id: number) => ["admins", id] as const,
 };
 export const useLoginUser = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<ILoginResponse>, APIError, ILoginRequest>({
     mutationKey: ["post login user"],
     mutationFn: (payload: ILoginRequest) => apiPostLogin(payload),
     onSuccess: (response) => {
       if (response?.error) {
-        toast.error(response.error.message || "Login failed");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Login failed");
         return;
       }
 
@@ -61,11 +66,12 @@ export const useGetAdminById = (id: number) => {
 };
 
 export const useCreateAdmin = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<IAdmin>, APIError, ICreateAdminRequest>({
     mutationFn: (data: ICreateAdminRequest) => apiCreateAdmin(data),
     onSuccess: (response) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to create admin");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to create admin");
         return;
       }
 
@@ -82,11 +88,12 @@ export const useCreateAdmin = () => {
 };
 
 export const useUpdateAdmin = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<IAdmin>, APIError, IUpdateAdminRequest>({
     mutationFn: (data: IUpdateAdminRequest) => apiUpdateAdmin(data),
     onSuccess: (response) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to update admin");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to update admin");
         return;
       }
 
@@ -103,11 +110,12 @@ export const useUpdateAdmin = () => {
 };
 
 export const useDeleteAdmin = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<{ success: boolean }>, APIError, number>({
     mutationFn: (id: number) => apiDeleteAdmin(id),
     onSuccess: (response) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to delete admin");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to delete admin");
         return;
       }
 
@@ -125,16 +133,17 @@ export const useDeleteAdmin = () => {
 
 // Toggle admin status
 export const useToggleAdminStatus = () => {
-  return useMutation({
+  return useMutation<APIBaseResponse<IToggleAdminStatusResponse>, APIError, IToggleAdminStatusRequest>({
     mutationFn: (data: IToggleAdminStatusRequest) => apiToggleAdminStatus(data),
     onSuccess: (response) => {
       if (response && response.error) {
-        toast.error(response.error.message || "Failed to toggle admin status");
+        const errMsg = (response.error as APIError)?.message;
+        toast.error(errMsg || "Failed to toggle admin status");
         return;
       }
 
       if (response && response.status === true) {
-        const newStatus = response.data?.newStatus
+        const newStatus = (response.data as IToggleAdminStatusResponse)?.newStatus
           ? "activated"
           : "deactivated";
         toast.success(`Admin ${newStatus} successfully`);
