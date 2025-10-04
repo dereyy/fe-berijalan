@@ -26,12 +26,11 @@ const QueueTicketPage: FC<QueueTicketProps> = ({ className }) => {
 
   const handleRefreshQueue = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/v1/queues/current", {
-        credentials: "include",
-      });
-      const json = await res.json();
-      setDebugQueue(json.data || json);
-      console.log("Current queue:", json);
+  const res = await import("@/services/queue/api.service").then((m) => m.apiGetCurrentQueues());
+  // apiGetCurrentQueues returns APIBaseResponse<T> or an error shape. Normalize to data array when possible
+  const normalized = (res && (res as any).data) ? (res as any).data : res;
+  setDebugQueue(normalized || null);
+  console.log("Current queue:", normalized);
     } catch (e) {
       setDebugQueue(null);
     }

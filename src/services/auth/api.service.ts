@@ -16,17 +16,19 @@ import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { AxiosError } from "axios";
 
-const API_BASE_PATH = "/api/v1/auth";
+const API_AUTH_BASE = "/api/v1/auth";
+const API_ADMIN_BASE = "/api/v1/admin";
+const ADMIN_BASE_PATH = "/api/v1/admin";
 
 export const apiPostLogin = async (body: ILoginRequest) => {
   try {
     const cookie = await cookies();
     cookie.delete("token");
 
-    const res = await satellite.post<APIBaseResponse<ILoginResponse>>(
-      `${API_BASE_PATH}/login`,
-      body
-    );
+        const res = await satellite.post<APIBaseResponse<ILoginResponse>>(
+          `${API_AUTH_BASE}/login`,
+          body
+        );
 
     if (res.data.status === true && res.data.data?.token) {
       await setToken(res.data.data.token);
@@ -41,10 +43,9 @@ export const apiPostLogin = async (body: ILoginRequest) => {
 
 export const apiGetAllAdmins = async () => {
   try {
-    const res = await satellite.get<APIBaseResponse<IAdmin[]>>(
-      `${API_BASE_PATH}/`,
-      
-    );
+        const res = await satellite.get<APIBaseResponse<IAdmin[]>>(
+          `${API_ADMIN_BASE}/`
+        );
     return res.data;
   } catch (error) {
     return errorMessage<IAdmin[]>(error);
@@ -53,9 +54,9 @@ export const apiGetAllAdmins = async () => {
 
 export const apiGetAdminById = async (id: number) => {
   try {
-    const res = await satellite.get<APIBaseResponse<IAdmin>>(
-      `${API_BASE_PATH}/${id}`
-    );
+        const res = await satellite.get<APIBaseResponse<IAdmin>>(
+          `${API_ADMIN_BASE}/${id}`
+        );
     return res.data;
   } catch (error) {
     return errorMessage<IAdmin>(error);
@@ -64,10 +65,10 @@ export const apiGetAdminById = async (id: number) => {
 
 export const apiCreateAdmin = async (data: ICreateAdminRequest) => {
   try {
-    const res = await satellite.post<APIBaseResponse<IAdmin>>(
-      `${API_BASE_PATH}/create`,
-      data
-    );
+        const res = await satellite.post<APIBaseResponse<IAdmin>>(
+          `${API_ADMIN_BASE}/create`,
+          data
+        );
     return res.data;
   } catch (error) {
     return errorMessage<IAdmin>(error);
@@ -78,10 +79,10 @@ export const apiUpdateAdmin = async (data: IUpdateAdminRequest) => {
   try {
     const id = data.id;
     delete data.id;
-    const res = await satellite.put<APIBaseResponse<IAdmin>>(
-      `${API_BASE_PATH}/${id}`,
-      data
-    );
+        const res = await satellite.put<APIBaseResponse<IAdmin>>(
+          `${API_ADMIN_BASE}/${id}`,
+          data
+        );
     return res.data;
   } catch (error) {
     return errorMessage<IAdmin>(error);
@@ -90,9 +91,9 @@ export const apiUpdateAdmin = async (data: IUpdateAdminRequest) => {
 
 export const apiDeleteAdmin = async (id: number) => {
   try {
-    const res = await satellite.delete<APIBaseResponse<{ success: boolean }>>(
-      `${API_BASE_PATH}/${id}`
-    );
+        const res = await satellite.delete<APIBaseResponse<{ success: boolean }>>(
+          `${API_ADMIN_BASE}/${id}`
+        );
     return res.data;
   } catch (error) {
     return errorMessage<{ success: boolean }>(error);
@@ -103,9 +104,9 @@ export const apiToggleAdminStatus = async (
   data: IToggleAdminStatusRequest
 ): Promise<APIBaseResponse<IToggleAdminStatusResponse>> => {
   try {
-    const res = await satellite.patch<
-      APIBaseResponse<IToggleAdminStatusResponse>
-    >(`${API_BASE_PATH}/${data.id}/toggle-status`);
+        const res = await satellite.patch<
+          APIBaseResponse<IToggleAdminStatusResponse>
+        >(`${API_ADMIN_BASE}/${data.id}/toggle-status`);
     return res.data;
   } catch (error) {
     return errorMessage<IToggleAdminStatusResponse>(error);

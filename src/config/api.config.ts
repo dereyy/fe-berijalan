@@ -1,42 +1,33 @@
-"use server";
-import { tokenInterceptor } from "@/services/auth/api.service";
 import axios from "axios";
-import { cookies } from "next/headers";
 import { env } from "./env.config";
 
+const BASE_URL = env.APP.API_URL || "http://localhost:3000";
+const API_KEY = env.APP.API_KEY || undefined;
+
 export const satellite = axios.create({
-  baseURL: env.APP.API_URL,
-  headers: {
-    APIKey: env.APP.API_KEY,
-  },
+  baseURL: BASE_URL,
+  headers: API_KEY ? { APIKey: API_KEY, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
-satellite.interceptors.request.use(
-  async function (request) {
-    try {
-      const cookieStore = await cookies();
-      const token = cookieStore.get("token")?.value;
-
-      if (token) {
-        request.headers.Authorization = `Bearer ${token || ""}`;
-      }
-    } catch (error) {
-      return Promise.reject(error);
+// attach token from localStorage for client requests
+satellite.interceptors.request.use(function (request) {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (token && request && request.headers) {
+      request.headers.Authorization = `Bearer ${token}`;
     }
-
-    return request;
-  },
-  function (error) {
-    return Promise.reject(error);
-  }
-);
+    console.log("satellite request ->", request?.baseURL, request?.url);
+  } catch (e) {}
+  return request;
+});
 
 satellite.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  async function (error) {
-    console.log("error in main", error.response);
-    return tokenInterceptor(error);
+  (response) => response,
+  (error) => {
+    try {
+      console.log("error in main", error?.message, error?.config?.url, error?.config?.baseURL);
+    } catch (e) {}
+    return Promise.reject(error);
   }
 );

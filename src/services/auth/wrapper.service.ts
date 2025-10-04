@@ -18,6 +18,8 @@ import {
 import toast from "react-hot-toast";
 import { APIBaseResponse } from "@/interfaces/api.interface";
 import { IAdmin, ILoginResponse, IToggleAdminStatusResponse } from "../../interfaces/services/auth.interface";
+import { satellite } from "@/config/api.config";
+import { useRouter } from "next/navigation";
 
 type APIError = { message?: string };
 
@@ -26,6 +28,7 @@ const AUTH_KEYS = {
   byId: (id: number) => ["admins", id] as const,
 };
 export const useLoginUser = () => {
+  const router = useRouter();
   return useMutation<APIBaseResponse<ILoginResponse>, APIError, ILoginRequest>({
     mutationKey: ["post login user"],
     mutationFn: (payload: ILoginRequest) => apiPostLogin(payload),
@@ -37,7 +40,14 @@ export const useLoginUser = () => {
       }
 
       if (response && response.status === true) {
+        // if backend returned token in data, store it on client side
+        const token = (response.data as ILoginResponse | undefined)?.token;
+        if (token && typeof window !== "undefined") {
+          localStorage.setItem("token", token);
+          satellite.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
         toast.success("Login successful");
+        router.push("/admin");
       } else {
         toast.error(response?.message || "Login failed");
       }

@@ -25,16 +25,20 @@ const QueueDisplayPage: React.FC<QueueDisplayBoardProps> = ({ className }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {(currentQueues?.data || [])
-          .filter(
-            (counter: ICurrentQueuesResponse) => counter?.isActive === true
-          )
-          .map((counter: ICurrentQueuesResponse) => {
+          .filter((counter: any) => counter?.isActive === true)
+          .map((counter: any) => {
+            const counterId = counter.counterId ?? counter.id;
+            const counterName = counter.counterName ?? counter.name ?? "Counter";
+            const queueNumber = counter.currentQueue ?? counter.currentQueueNumber ?? null;
+            const rawStatus = (counter.nextQueueStatus ?? counter.status ?? "released") as string;
+            const status = rawStatus ? rawStatus.toString().toUpperCase() : "RELEASED";
+
             return (
               <CurrentQueueDisplay
-                key={counter.id}
-                counterName={counter.name || "Counter"}
-                queueNumber={counter.currentQueue}
-                status={counter.status || "RELEASED"}
+                key={counterId}
+                counterName={counterName}
+                queueNumber={queueNumber}
+                status={status as any}
               />
             );
           })}
